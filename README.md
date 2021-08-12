@@ -1,5 +1,5 @@
 # Template-Based Inter-modality Super-resolution of Brain Connectivity (TIS-Net)
-TIS-Net is a framework for predicting a connectional brain template (CBT) for a target modality from given the source modality using one-shot learning.
+TIS-Net is a framework for super-resolving cross-modality brain graphs using one shot learning (i.e., a single training sample).
 
 Please contact pala18@itu.edu.tr for inquiries. Thanks. 
 
