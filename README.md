@@ -96,7 +96,7 @@ The figure above shows an example result of predicted and ground-truth CBT toget
   @inproceedings{pala2021,
     title={Template-Based Inter-modality Super-resolution of Brain Connectivity (TIS-Net)},
     author={Pala, Furkan and Mhiri, Islem and Rekik, Islem},
-    booktitle={Medical Image Computing and Computer Assisted Intervention},
+    booktitle={International Workshop on PRedictive Intelligence In MEdicine},
     year={2021},
     organization={Springer}
   }
