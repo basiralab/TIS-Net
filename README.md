@@ -94,11 +94,13 @@ The figure above shows an example result of predicted and ground-truth CBT toget
 ## YouTube videos to install and run the code and understand how TIS-Net works
 
 To install and run TIS-Net, check the following YouTube video: 
-https://www.youtube.com/watch?v=ydQvqx8rMiw
+
+https://www.youtube.com/watch?v=c3HrY53JUw0
 
 To learn about how TIS-Net works, check the following YouTube video: 
 
-https://www.youtube.com/watch?v=c3HrY53JUw0
+https://www.youtube.com/watch?v=ydQvqx8rMiw
+
 
 ## Please cite the following paper when using DGN
 ```latex
