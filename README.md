@@ -91,6 +91,15 @@ The figure above shows an example result of predicted and ground-truth CBT toget
 ##### <sup>1</sup> Calculated between predicted and ground-truth CBT.<br/>
 ##### <sup>2</sup> Calculated between predicted CBT and each test sample in target domain.
 
+## YouTube videos to install and run the code and understand how TIS-Net works
+
+To install and run TIS-Net, check the following YouTube video: 
+https://www.youtube.com/watch?v=ydQvqx8rMiw
+
+To learn about how TIS-Net works, check the following YouTube video: 
+
+https://www.youtube.com/watch?v=c3HrY53JUw0
+
 ## Please cite the following paper when using DGN
 ```latex
   @inproceedings{pala2021,
