@@ -11,7 +11,7 @@ from config import N_CLUSTERS, N_SOURCE_NODES, N_TARGET_NODES, DGN_MODEL_PARAMS_
 from helper import cast_to_DGN_graph, source_to_graph
 from random import sample
 from centrality import topological_measures
-
+import time
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
@@ -44,9 +44,12 @@ class Generator(nn.Module):
             If the target data includes many ROIs,
             enabling the second layer below makes the third layer consumed too much memory that program crashes
         """
+        
+        #Enabled
         # x2 = torch.sigmoid(self.conv22(self.conv2(x1, edge_index, edge_attr)))
         # x2 = F.dropout(x2, training=self.training)
-
+        #Enabled End
+        
         x3 = torch.sigmoid(self.conv33(self.conv3(x1, edge_index, edge_attr)))
         x3 = F.dropout(x3, training=self.training)
 
@@ -219,6 +222,7 @@ class TIS_Net():
 
         # Training loop
         for epoch in range(N_EPOCHS):
+            start = time.time() # Modification
             with torch.autograd.set_detect_anomaly(True):
                 # Lists to store CBTs for each cluster
                 source_CBTs_for_clusters = []
@@ -249,10 +253,19 @@ class TIS_Net():
                     final_target_cbt = final_target_cbt.detach().cpu().clone().numpy()
                     target_CBTs_for_clusters.append(final_target_cbt)
 
+                # Original
+                #source_CBTs_for_clusters = np.array(
+                    #source_CBTs_for_clusters).reshape(N_CLUSTERS, 35, 35, 1) #Is There a mistake? 
+                #target_CBTs_for_clusters = np.array(
+                    #target_CBTs_for_clusters).reshape(N_CLUSTERS, 160, 160, 1) # Static?
+
+                ### Yekta's fix ###
                 source_CBTs_for_clusters = np.array(
-                    source_CBTs_for_clusters).reshape(N_CLUSTERS, 35, 35, 1)
-                target_CBTs_for_clusters = np.array(
-                    target_CBTs_for_clusters).reshape(N_CLUSTERS, 160, 160, 1)
+                    source_CBTs_for_clusters).reshape(N_CLUSTERS, N_SOURCE_NODES, N_SOURCE_NODES, 1) # Proposed Fix
+                target_CBTs_for_clusters = np.array( 
+                    target_CBTs_for_clusters).reshape(N_CLUSTERS, N_TARGET_NODES, N_TARGET_NODES, 1) # Proposed Fix
+                ### Yekta's fix END###
+
 
                 # Cluster specific CBTs to single CBT
 
@@ -301,8 +314,8 @@ class TIS_Net():
                     torch.stack(target_cluster_to_cbt_loss)))
 
                 # Convert source CBT to torch.geometric.Data object
-                row0 = np.repeat(np.arange(35), 35)
-                row1 = np.tile(np.arange(35), 35)
+                row0 = np.repeat(np.arange(N_SOURCE_NODES), N_SOURCE_NODES)
+                row1 = np.tile(np.arange(N_SOURCE_NODES), N_SOURCE_NODES)
                 edge_index = np.array([row0, row1])
                 edge_index_tensor = torch.from_numpy(edge_index).long()
 
@@ -310,8 +323,8 @@ class TIS_Net():
                                    edge_attr=final_source_cbt.view(-1, 1)).to(self.device)
 
                 # Convert target CBT to torch.geometric.Data object
-                row0 = np.repeat(np.arange(160), 160)
-                row1 = np.tile(np.arange(160), 160)
+                row0 = np.repeat(np.arange(N_TARGET_NODES), N_TARGET_NODES) # changed from 160,160 N_TARGET_NODES,N_TARGET_NODES
+                row1 = np.tile(np.arange(N_TARGET_NODES), N_TARGET_NODES) # changed from 160,160 N_TARGET_NODES,N_TARGET_NODES
                 edge_index = np.array([row0, row1])
                 edge_index_tensor = torch.from_numpy(edge_index).long()
 
@@ -338,8 +351,8 @@ class TIS_Net():
 
                 edge_attr = gen_out.view(-1, 1)
 
-                row0 = np.repeat(np.arange(160), 160)
-                row1 = np.tile(np.arange(160), 160)
+                row0 = np.repeat(np.arange(N_TARGET_NODES), N_TARGET_NODES) # changed from 160,160 N_TARGET_NODES,N_TARGET_NODES
+                row1 = np.tile(np.arange(N_TARGET_NODES), N_TARGET_NODES) # changed from 160,160 N_TARGET_NODES,N_TARGET_NODES
                 edge_index = np.array([row0, row1])
                 edge_index_tensor = torch.from_numpy(edge_index).long()
 
@@ -387,9 +400,9 @@ class TIS_Net():
                 self.discriminator_optimizer.step()
 
                 # L1_losses = torch.mean(torch.stack(L1_losses))
-
-            print("[Epoch: %d]| [Discriminator loss: %f]| [Generator loss: %f], | [L1 loss: %f]  " % (
-                epoch, D_loss.item(), G_loss.item(), L1_loss.item()))
+            elaplasedTime = time.time() - start
+            print("[Epoch: %d]| [Discriminator loss: %f]| [Generator loss: %f], | [L1 loss: %f] | [Elapsed Time: %f] " % (
+                epoch, D_loss.item(), G_loss.item(), L1_loss.item(),elaplasedTime))
 
     # Taken from https://github.com/basiralab/DGN/blob/master/model.py
     def get_CBT(self, train_casted, targets, loss_weights, dgn, n_nodes):
@@ -466,8 +479,8 @@ class TIS_Net():
 
             target_CBTs.append(cluster_spefific_target_cbt)
 
-        src_CBTs = np.array(src_CBTs).reshape(N_CLUSTERS, 35, 35, 1)
-        target_CBTs = np.array(target_CBTs).reshape(N_CLUSTERS, 160, 160, 1)
+        src_CBTs = np.array(src_CBTs).reshape(N_CLUSTERS, N_SOURCE_NODES, N_SOURCE_NODES, 1) # changed from 35,35 N_SOURCE_NODES,N_SOURCE_NODES
+        target_CBTs = np.array(target_CBTs).reshape(N_CLUSTERS, N_TARGET_NODES, N_TARGET_NODES, 1) # changed from 165,165 N_TARGET_NODES,N_TARGET_NODES
 
         test_src_casted = [d.to(self.device) for d in cast_to_DGN_graph(src_CBTs)]
 
