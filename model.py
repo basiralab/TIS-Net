@@ -37,7 +37,7 @@ class Generator(nn.Module):
     def forward(self, data):
         x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
 
-        x1 = torch.sigmoid(self.conv11(self.conv1(x, edge_index, edge_attr)))
+        x1 = torch.sigmoid(self.conv11(self.conv1(x, edge_index.to(torch.long), edge_attr)))
         x1 = F.dropout(x1, training=self.training)
 
         """
@@ -50,7 +50,7 @@ class Generator(nn.Module):
         # x2 = F.dropout(x2, training=self.training)
         #Enabled End
         
-        x3 = torch.sigmoid(self.conv33(self.conv3(x1, edge_index, edge_attr)))
+        x3 = torch.sigmoid(self.conv33(self.conv3(x1, edge_index.to(torch.long), edge_attr)))
         x3 = F.dropout(x3, training=self.training)
 
         x4 = torch.matmul(x3.t(), x3)
