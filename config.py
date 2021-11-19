@@ -1,4 +1,5 @@
-# Train on simulated data (S: normal random dist.) or external data (E)
+# Train on simulated data (S: normal random dist.) or external data as square matrix (E)
+# Or if your data is already horizontally stacked feature vectors use (E2)
 DATASET = "S"
 
 # Path to external source data (binary file in NumPy .npy format)
@@ -33,6 +34,10 @@ N_CLUSTERS = 3
 # Model name
 MODEL_NAME = "TIS_Net_test_2"
 
+# If you have a GPU that has CUDA core but do not want to use CUDA you can chance following value to False
+# If you do not have a CUDA supported GPU, it will be overwritten automaticly
+USE_CUDA = False
+
 # DGN parameters for source domain model
 DGN_MODEL_PARAMS_SOURCE = {
     "N_ROIs": N_SOURCE_NODES,
@@ -66,10 +71,26 @@ DGN_MODEL_PARAMS_TARGET = {
 ############################# DO NOT MODIFY BELOW ###############################
 #################################################################################
 
-from helper import create_simulated_data
+from helper import create_simulated_data, squareMatrixToHorizantal
 import numpy as np
 
 if DATASET.lower() == "e":
+    X_s = squareMatrixToHorizantal (np.load(SOURCE_DATA_PATH))
+    X_t = squareMatrixToHorizantal (np.load(TARGET_DATA_PATH))
+
+    if X_s.shape[0] != X_t.shape[0]:
+        raise ValueError(
+            "Source and target datasets must have the same subject amount")
+
+    N_SUBJECTS = X_s.shape[0]
+    N_SOURCE_NODES = int( 0.5 + (0.25+2*X_s.shape[1])**(1/2) )
+    N_TARGET_NODES = int ( 0.5 + (0.25+2*X_t.shape[1])**(1/2) )
+
+elif DATASET.lower() == "s":
+    X_s, X_t = create_simulated_data(
+        N_SUBJECTS, N_SOURCE_NODES, N_TARGET_NODES)
+
+elif DATASET.lower() == "e2":
     X_s = np.load(SOURCE_DATA_PATH)
     X_t = np.load(TARGET_DATA_PATH)
 
@@ -78,12 +99,7 @@ if DATASET.lower() == "e":
             "Source and target datasets must have the same subject amount")
 
     N_SUBJECTS = X_s.shape[0]
-    N_SOURCE_NODES = X_s.shape[1]
-    N_TARGET_NODES = X_t.shape[2]
-
-elif DATASET.lower() == "s":
-    X_s, X_t = create_simulated_data(
-        N_SUBJECTS, N_SOURCE_NODES, N_TARGET_NODES)
-
+    N_SOURCE_NODES =  int( 0.5 + (0.25+2*X_s.shape[1])**(1/2) )
+    N_TARGET_NODES = int ( 0.5 + (0.25+2*X_t.shape[1])**(1/2) )
 else:
     raise ValueError("Dataset options are E or S")

@@ -60,7 +60,7 @@ from model import TIS_Net
 from sklearn.model_selection import KFold
 from config import N_FOLDS, N_CLUSTERS, MODEL_NAME, X_s, X_t
 from helper import cast_source_to_DGN_input, cast_target_to_DGN_input, cluster_with_SIMLR, print_final_results, save_fig, print_fold_specific_results, calc_norm_distances
-
+import time
 kf = KFold(n_splits=N_FOLDS)
 
 """
@@ -92,6 +92,9 @@ for train_index, test_index in kf.split(X_s):
     print(10 * "#" + " FOLD " + str(fold) + " " + 10 * "#")
 
     X_train_source, X_test_source, X_train_target, X_test_target = X_s[train_index], X_s[test_index], X_t[train_index], X_t[test_index]
+
+    # Calculating the time passed for each epoch
+    start = time.time()
 
     # SIMLR clustering
     X_casted_train_source_clusters  = cluster_with_SIMLR(X_train_source, cast_source_to_DGN_input, N_CLUSTERS)
@@ -132,8 +135,11 @@ for train_index, test_index in kf.split(X_s):
     # Calculate norm distances between predicted CBT and each test subject
     mean_norm_distance_fold_specific = np.mean(calc_norm_distances(predicted_CBT, X_test_target))
 
-    # Print results for each fold on stdout
-    print_fold_specific_results(fold, evaluation_results_fold_specific, mean_norm_distance_fold_specific)
+    # Calculate passed time
+    elaplasedTime = time.time() - start
+
+    # Print results for each fold on stdout with time passed
+    print_fold_specific_results(fold, evaluation_results_fold_specific, mean_norm_distance_fold_specific,elaplasedTime)
 
     # Save figures of predicted and ground-truth CBTs in "output/{MODEL_NAME}" folder
     save_fig(predicted_CBT, f"Predicted CBT for fold {fold}", f"pred_CBT_fold_{fold}.png")

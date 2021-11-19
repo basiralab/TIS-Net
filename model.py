@@ -7,7 +7,7 @@ from torch_geometric.nn import NNConv
 from torch_geometric.nn import GCNConv
 from torch_geometric.nn import BatchNorm
 import numpy as np
-from config import N_CLUSTERS, N_SOURCE_NODES, N_TARGET_NODES, DGN_MODEL_PARAMS_SOURCE, DGN_MODEL_PARAMS_TARGET, N_EPOCHS, N_CLUSTERS
+from config import N_CLUSTERS, N_SOURCE_NODES, N_TARGET_NODES, DGN_MODEL_PARAMS_SOURCE, DGN_MODEL_PARAMS_TARGET, N_EPOCHS, N_CLUSTERS, USE_CUDA
 from helper import cast_to_DGN_graph, source_to_graph
 from random import sample
 from centrality import topological_measures
@@ -136,8 +136,8 @@ class DGN(torch.nn.Module):
 
 class TIS_Net():
     def __init__(self):
-        # Use cuda if avaliable
-        if torch.cuda.is_available():
+        # Use cuda if avaliable and the user wants to use cuda
+        if torch.cuda.is_available() and USE_CUDA:
             self.device = torch.device("cuda:0")
             print("Running on cuda")
         else:

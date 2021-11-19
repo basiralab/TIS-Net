@@ -26,7 +26,7 @@ def calc_norm_distances(predicted_CBT, X_test_target):
     return norm_dists
 
 
-def print_fold_specific_results(fold, evaluation_results_fold_specific, mean_norm_distance_fold_specific):
+def print_fold_specific_results(fold, evaluation_results_fold_specific, mean_norm_distance_fold_specific,elaplasedTime):
     """
         Prints the test results for the current fold
 
@@ -46,6 +46,10 @@ def print_fold_specific_results(fold, evaluation_results_fold_specific, mean_nor
     print("MAE(Eigenvector Centrality) ", str(evaluation_results_fold_specific["MAE(EC)"].item()))
     print("MAE(Betweenness Centrality): ", str(evaluation_results_fold_specific["MAE(BC)"].item()))
     print("Mean Norm Distance Between Each Test Subject and Predicted CBT: " + str(mean_norm_distance_fold_specific))
+
+    # Printing the time elaplased for each epoch
+    print("Time elapsed :", elaplasedTime)
+
     print()
 
 
@@ -405,3 +409,23 @@ def cast_to_DGN_graph(array_of_tensors, subject_type=None, flat_mask=None):
                     con_mat=con_mat,  y=y, label=subject_type)
         dataset.append(data)
     return dataset
+
+
+def squareMatrixToHorizantal(square_matrix_data_set):
+    """
+        This function is designed for users who want to use a dataset that is square matrix
+        It takes the square matrix and vectorizes its upper off-diagonal triangular part.
+        Then return the result
+        Parameters:
+            np.array: A dataset with shape [N_SUBJECTS, N_DIMENTION, N_DIMENTION]
+
+        Returns:
+            np.array: Array with shape [N_SUBJECTS, N_DIMENTION*(N_DIMENTION-1)*0.5]
+    
+    """
+    size,square_matrix_size = square_matrix_data_set.shape[0], square_matrix_data_set.shape[1]
+    row_lenght =int(square_matrix_size * (square_matrix_size-1) * 0.5)
+    result = np.zeros([size,row_lenght])
+    for i in range(0,len(square_matrix_data_set)):
+        result[i] = square_matrix_data_set[i][np.triu_indices(square_matrix_size,k = 1)]
+    return result
